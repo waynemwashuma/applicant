@@ -131,7 +131,9 @@ This changes how the site opens application records.
 
 Click `Applications`.
 
-In Reviewer mode, clicking an application opens the reviewer workspace instead of the normal user detail page.
+In both roles, clicking an application opens the normal detail page first.
+
+If you are in Reviewer mode, you can use the `Start Review` or `Open Reviewer Form` actions on the detail page to continue into the reviewer workspace.
 
 ### 3. Find the application you want to review
 

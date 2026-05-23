@@ -3,13 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { FiFolderPlus } from 'react-icons/fi'
 import { useApplicationStore } from '../common/ApplicationStoreContext'
 import { formatDate, statusMeta } from '../common/applicationWorkflow'
-import type { UserRole } from '../common/roleMode'
-
-type ApplicationsPageProps = {
-  userRole: UserRole
-}
-
-export default function ApplicationsPage({ userRole }: ApplicationsPageProps) {
+export default function ApplicationsPage() {
   const navigate = useNavigate()
   const { applications, isLoading } = useApplicationStore()
 
@@ -53,13 +47,7 @@ export default function ApplicationsPage({ userRole }: ApplicationsPageProps) {
               <button
                 key={application.id}
                 className="list-row"
-                onClick={() =>
-                  navigate(
-                    userRole === 'reviewer'
-                      ? `/applications/${application.id}/review`
-                      : `/applications/${application.id}`,
-                  )
-                }
+                onClick={() => navigate(`/applications/${application.id}`)}
               >
                 <span className="cell tracking">{application.tracking_number}</span>
                 <span className="cell">{application.applicant_name}</span>

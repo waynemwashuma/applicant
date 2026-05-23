@@ -243,7 +243,7 @@ export default function App() {
               }
             >
               <Route index element={<Navigate to="/applications" replace />} />
-              <Route path="/applications" element={<ApplicationsPage userRole={userRole} />} />
+              <Route path="/applications" element={<ApplicationsPage />} />
               <Route path="/applications/new" element={<CreateRoute />} />
               <Route path="/applications/:id" element={<DetailRoute />} />
               <Route path="/applications/:id/edit" element={<EditApplicationRoute />} />
