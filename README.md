@@ -5,6 +5,12 @@ This project has two parts:
 - A Django backend that stores and serves application data
 - A React frontend that lets you create, review, and update applications
 
+## User guide
+
+If you want to understand how the website works before running it, start with the [User Guide](user-guide.md). It explains the user flow and the reviewer flow step by step.
+
+There is also a [live version](https://waynemwashuma.github.io/applicant/) of the frontend on this repository's GitHub Pages site, and it uses mock data so you can explore the app without running the backend locally.
+
 ## What You Need
 
 - A computer with `Node.js` and `npm` installed
@@ -59,6 +65,7 @@ npm run start:backend
 
 - [Backend README](backend/README.md)
 - [Frontend README](frontend/README.md)
+- [User Guide](user-guide.md)
 
 ## Common Problems
 
