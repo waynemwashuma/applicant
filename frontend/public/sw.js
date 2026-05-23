@@ -1,4 +1,4 @@
-const CACHE_NAME = 'workflow-tracker-mock-api-v1'
+const CACHE_NAME = 'workflow-tracker-mock-api-v2'
 const APPLICATIONS_CACHE_KEY = '/__workflow-tracker__/applications'
 let apiMode = 'live'
 
@@ -26,7 +26,75 @@ function createSeedApplications() {
   const at = (days, hours = 0) =>
     new Date(base.getTime() + days * 24 * 60 * 60 * 1000 + hours * 60 * 60 * 1000).toISOString()
 
-  return [
+  const statusCycle = [
+    'Draft',
+    'Submitted',
+    'Under Review',
+    'Need More Information',
+    'Approved',
+    'Rejected',
+  ]
+  const applicationTypes = [
+    'Recordation',
+    'Renewal',
+    'Change of Ownership',
+    'Change of Name',
+    'Discontinuation',
+  ]
+  const applicantNames = [
+    'Amina Kibet',
+    'Daniel Mwangi',
+    'Sophia Njeri',
+    'Peter Otieno',
+    'Nadia Hassan',
+    'Moses Ouma',
+    'Grace Achieng',
+    'Ibrahim Ali',
+    'Esther Wanjiku',
+    'Kevin Kiptoo',
+    'Mercy Chebet',
+    'Brian Mutua',
+    'Faith Kamau',
+    'Josephine Atieno',
+    'Isaac Mumo',
+    'Lilian Nduku',
+    'Charles Muriuki',
+    'Hellen Wairimu',
+    'Samuel Ndungu',
+    'Naomi Jelagat',
+  ]
+  const companyNames = [
+    'Northstar Media Ltd',
+    'Greenfield Renewals',
+    'Harbor IP Services',
+    'Kijiji Brands',
+    'Sunrise Registry',
+    'Lighthouse Holdings',
+    'Summit Legal Partners',
+    'Bluewater Commerce',
+    'Pinecrest Ventures',
+    'Riverside Filings',
+    'Atlas Compliance Group',
+    'Evergreen Records',
+    'Meridian Assets Ltd',
+    'Cedar Gate Solutions',
+    'Nairobi Filing Co',
+    'Highland Mark Ltd',
+    'Orbit Legal Services',
+    'Mosaic Registry Bureau',
+    'Stonebridge Holdings',
+    'Prairie House Ventures',
+  ]
+  const reviewerComments = {
+    Approved: 'Looks complete. Approved for closure.',
+    Rejected: 'Missing supporting material or required signatures.',
+    'Need More Information': 'Please attach the missing supporting documents.',
+    Submitted: '',
+    'Under Review': '',
+    Draft: '',
+  }
+
+  const seedApplications = [
     {
       id: 'seed-1',
       tracking_number: 'APP-0001',
@@ -124,6 +192,52 @@ function createSeedApplications() {
       reviewed_at: at(6, 2),
     },
   ]
+
+  const generatedApplications = Array.from({ length: 44 }, (_, index) => {
+    const seedNumber = index + 7
+    const status = statusCycle[index % statusCycle.length]
+    const applicationType = applicationTypes[index % applicationTypes.length]
+    const applicantName = applicantNames[index % applicantNames.length]
+    const companyName = companyNames[index % companyNames.length]
+    const dayOffset = seedNumber - 1
+    const createdAt = at(dayOffset)
+    const submittedAt = status === 'Draft' ? null : at(dayOffset, 2)
+    const reviewedAt =
+      status === 'Approved' || status === 'Rejected' || status === 'Need More Information'
+        ? at(dayOffset + 1, 1)
+        : null
+    const updatedAt =
+      reviewedAt ?? submittedAt ?? createdAt
+
+    return {
+      id: `seed-${seedNumber}`,
+      tracking_number: createTrackingNumber(seedNumber - 1),
+      applicant_name: applicantName,
+      applicant_email: `${applicantName.toLowerCase().replace(/\s+/g, '.').replace(/[^a-z.]/g, '')}@example.com`,
+      company_name: companyName,
+      application_type: applicationType,
+      description:
+        status === 'Draft'
+          ? `Draft filing for ${applicationType.toLowerCase()} awaiting final review.`
+          : status === 'Submitted'
+            ? `Submitted ${applicationType.toLowerCase()} ready for the next workflow step.`
+            : status === 'Under Review'
+              ? `Current review in progress for this ${applicationType.toLowerCase()} request.`
+              : status === 'Need More Information'
+                ? `Reviewer asked for additional documents before approval can continue.`
+                : status === 'Approved'
+                  ? `Completed ${applicationType.toLowerCase()} application approved and closed.`
+                  : `Completed ${applicationType.toLowerCase()} application rejected after review.`,
+      status,
+      reviewer_comment: reviewerComments[status],
+      created_at: createdAt,
+      updated_at: updatedAt,
+      submitted_at: submittedAt,
+      reviewed_at: reviewedAt,
+    }
+  })
+
+  return [...seedApplications, ...generatedApplications]
 }
 
 async function jsonResponse(payload, status = 200) {
