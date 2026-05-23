@@ -6,7 +6,7 @@ import { formatDate, statusMeta } from '../common/applicationWorkflow'
 
 export default function ApplicationsPage() {
   const navigate = useNavigate()
-  const { applications } = useApplicationStore()
+  const { applications, isLoading } = useApplicationStore()
 
   const sortedApplications = useMemo(
     () =>
@@ -40,26 +40,30 @@ export default function ApplicationsPage() {
           <span>Created</span>
         </div>
 
-        <div className="list">
-          {sortedApplications.map((application) => (
-            <button
-              key={application.id}
-              className="list-row"
-              onClick={() => navigate(`/applications/${application.id}`)}
-            >
-              <span className="cell tracking">{application.tracking_number}</span>
-              <span className="cell">{application.applicant_name}</span>
-              <span className="cell">{application.company_name}</span>
-              <span className="cell muted">{application.application_type}</span>
-              <span className="cell">
-                <span className={statusMeta[application.status].tone}>
-                  {application.status}
+        {isLoading ? (
+          <div className="loading-state">Loading applications...</div>
+        ) : (
+          <div className="list">
+            {sortedApplications.map((application) => (
+              <button
+                key={application.id}
+                className="list-row"
+                onClick={() => navigate(`/applications/${application.id}`)}
+              >
+                <span className="cell tracking">{application.tracking_number}</span>
+                <span className="cell">{application.applicant_name}</span>
+                <span className="cell">{application.company_name}</span>
+                <span className="cell muted">{application.application_type}</span>
+                <span className="cell">
+                  <span className={statusMeta[application.status].tone}>
+                    {application.status}
+                  </span>
                 </span>
-              </span>
-              <span className="cell muted">{formatDate(application.created_at)}</span>
-            </button>
-          ))}
-        </div>
+                <span className="cell muted">{formatDate(application.created_at)}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </section>
     </section>
   )

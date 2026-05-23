@@ -4,7 +4,7 @@ This workspace contains the Django project for the application workflow tracker.
 
 ## Overview
 
-- Framework: Django
+- Framework: Django + Django Ninja
 - Database: SQLite (`db.sqlite3`)
 - App code: `api/`
 - Project config: `config/`
@@ -65,6 +65,18 @@ Run the Django shell:
 ```bash
 python manage.py shell
 ```
+
+## API Endpoints
+
+The workflow API is mounted under `/api/`:
+
+- `GET /api/applications`
+- `POST /api/applications`
+- `GET /api/applications/{id}`
+- `PATCH /api/applications/{id}`
+- `POST /api/applications/{id}/submit`
+- `POST /api/applications/{id}/start-review`
+- `POST /api/applications/{id}/decision`
 
 ## Notes
 

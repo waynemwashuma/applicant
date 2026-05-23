@@ -67,8 +67,6 @@ export const WORKFLOW_STATUSES: ApplicationStatus[] = [
   'Rejected',
 ]
 
-export const STORAGE_KEY = 'workflow-tracker-mock-applications-v2'
-
 export const statusMeta: Record<
   ApplicationStatus,
   { tone: string; label: string; help: string }
@@ -132,111 +130,6 @@ export function formatDateTime(iso: string | null) {
 export function createTrackingNumber(index: number) {
   const padded = String(index + 1).padStart(4, '0')
   return `APP-${padded}`
-}
-
-export function createSeedApplications(): Application[] {
-  const base = new Date('2026-05-12T08:30:00.000Z')
-  const at = (days: number, hours = 0) =>
-    new Date(base.getTime() + days * 24 * 60 * 60 * 1000 + hours * 60 * 60 * 1000).toISOString()
-
-  return [
-    {
-      id: 'seed-1',
-      tracking_number: 'APP-0001',
-      applicant_name: 'Amina Kibet',
-      applicant_email: 'amina.kibet@example.com',
-      company_name: 'Northstar Media Ltd',
-      application_type: 'Recordation',
-      description:
-        'Register a new recordation application for a recently completed transfer.',
-      status: 'Draft',
-      reviewer_comment: '',
-      created_at: at(0),
-      updated_at: at(0),
-      submitted_at: null,
-      reviewed_at: null,
-    },
-    {
-      id: 'seed-2',
-      tracking_number: 'APP-0002',
-      applicant_name: 'Daniel Mwangi',
-      applicant_email: 'daniel.mwangi@example.com',
-      company_name: 'Greenfield Renewals',
-      application_type: 'Renewal',
-      description:
-        'Renew an existing filing with updated supporting documents and contact details.',
-      status: 'Submitted',
-      reviewer_comment: '',
-      created_at: at(1),
-      updated_at: at(1, 4),
-      submitted_at: at(1, 2),
-      reviewed_at: null,
-    },
-    {
-      id: 'seed-3',
-      tracking_number: 'APP-0003',
-      applicant_name: 'Sophia Njeri',
-      applicant_email: 'sophia.njeri@example.com',
-      company_name: 'Harbor IP Services',
-      application_type: 'Change of Ownership',
-      description:
-        'Ownership moved from the previous operator to a new corporate entity.',
-      status: 'Under Review',
-      reviewer_comment: '',
-      created_at: at(2),
-      updated_at: at(3, 1),
-      submitted_at: at(2, 5),
-      reviewed_at: null,
-    },
-    {
-      id: 'seed-4',
-      tracking_number: 'APP-0004',
-      applicant_name: 'Peter Otieno',
-      applicant_email: 'peter.otieno@example.com',
-      company_name: 'Kijiji Brands',
-      application_type: 'Change of Name',
-      description:
-        'The business has rebranded and needs the application updated to the new legal name.',
-      status: 'Need More Information',
-      reviewer_comment: 'Please attach the certificate of incorporation and supporting resolution.',
-      created_at: at(3),
-      updated_at: at(4, 2),
-      submitted_at: at(3, 4),
-      reviewed_at: at(4, 2),
-    },
-    {
-      id: 'seed-5',
-      tracking_number: 'APP-0005',
-      applicant_name: 'Nadia Hassan',
-      applicant_email: 'nadia.hassan@example.com',
-      company_name: 'Sunrise Registry',
-      application_type: 'Discontinuation',
-      description:
-        'The applicant has requested discontinuation and closure of the registration record.',
-      status: 'Approved',
-      reviewer_comment: 'Looks complete. Approved for closure.',
-      created_at: at(4),
-      updated_at: at(5, 3),
-      submitted_at: at(4, 6),
-      reviewed_at: at(5, 3),
-    },
-    {
-      id: 'seed-6',
-      tracking_number: 'APP-0006',
-      applicant_name: 'Moses Ouma',
-      applicant_email: 'moses.ouma@example.com',
-      company_name: 'Lighthouse Holdings',
-      application_type: 'Recordation',
-      description:
-        'Submitted with incomplete supporting material and missing signatures.',
-      status: 'Rejected',
-      reviewer_comment: 'Missing signatures and incomplete supporting material.',
-      created_at: at(5),
-      updated_at: at(6, 2),
-      submitted_at: at(5, 2),
-      reviewed_at: at(6, 2),
-    },
-  ]
 }
 
 export function blankForm(): ApplicationFormState {
@@ -347,4 +240,3 @@ export function getWorkflowHint(status: ApplicationStatus) {
   if (canReview(status)) return 'The reviewer decision form is available.'
   return 'The workflow is locked for this application.'
 }
-

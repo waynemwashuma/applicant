@@ -1,8 +1,8 @@
 # Frontend
 
 This workspace contains the React user interface for the application workflow tracker.
-For now, the UI uses a mocked backend stored in browser `localStorage`, so you can
-exercise the workflow without the Django API running.
+The UI now talks to the Django API through `/api` requests and uses a service
+worker as an offline mock fallback when the backend is unavailable.
 
 ## Overview
 
@@ -13,7 +13,7 @@ exercise the workflow without the Django API running.
 - App shell: `src/App.tsx`
 - Styling: `src/App.css` and `src/main.css`
 - Shared workflow logic: `src/common/`
-- Data layer: local mock repository with seeded workflow examples
+- Data layer: fetch-driven API client with a service worker mock fallback
 - Routes: applications list, create/edit form, and application detail screens
 
 ## Run The Frontend
@@ -64,4 +64,4 @@ npm run preview
 - The UI already includes the application list, detail, create/edit form, and reviewer decision screens described in the assignment brief
 - The routed pages live under `src/pages/`
 - The shared workflow rules, validation, and mock store live under `src/common/`
-- The browser cache stores the mock application data; clearing site data will restore the seeded examples
+- The service worker keeps the offline mock application data in Cache Storage; clearing site data will restore the seeded examples

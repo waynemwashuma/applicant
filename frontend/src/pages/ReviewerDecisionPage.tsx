@@ -11,6 +11,7 @@ import {
 } from 'react-icons/fi'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useApplicationStore } from '../common/ApplicationStoreContext'
+import type { Application } from '../common/applicationWorkflow'
 import {
   formatDateTime,
   canReview,
@@ -20,51 +21,46 @@ import {
   type ReviewFormState,
 } from '../common/applicationWorkflow'
 
-export default function ReviewerDecisionPage() {
-  const navigate = useNavigate()
-  const { id } = useParams()
-  const { getApplication, startReview, recordDecision } = useApplicationStore()
+type ReviewerDecisionWorkspaceProps = {
+  application: Application
+  navigate: (path: string) => void
+  startReview: (id: string) => Promise<Application | null>
+  recordDecision: (
+    id: string,
+    decision: ReviewFormState['decision'],
+    comment: string,
+  ) => Promise<Application | null>
+}
 
-  const application = id ? getApplication(id) : undefined
-  const [reviewState, setReviewState] = useState<ReviewFormState>({
+function ReviewerDecisionWorkspace({
+  application,
+  navigate,
+  startReview,
+  recordDecision,
+}: ReviewerDecisionWorkspaceProps) {
+  const [reviewState, setReviewState] = useState<ReviewFormState>(() => ({
     decision: 'Approved',
-    comment: application?.reviewer_comment ?? '',
-  })
+    comment: application.reviewer_comment ?? '',
+  }))
   const [error, setError] = useState('')
-
-  if (!application) {
-    return (
-      <section className="detail-card empty-state">
-        <div className="empty-illustration">
-          <FiAlertCircle />
-        </div>
-        <span className="panel-kicker">Not found</span>
-        <h2>The requested application does not exist.</h2>
-        <p>Check the tracking number or return to the queue.</p>
-        <button className="primary-button" onClick={() => navigate('/applications')}>
-          Back to applications
-        </button>
-      </section>
-    )
-  }
 
   const isReviewable = canReview(application.status)
   const isReadyToStart = canStartReview(application.status)
 
-  function handleDecisionSave() {
+  async function handleDecisionSave() {
     if (needsReviewerComment(reviewState.decision) && !reviewState.comment.trim()) {
       setError('A reviewer comment is required for this decision.')
       return
     }
 
-    const updated = recordDecision(application.id, reviewState.decision, reviewState.comment)
+    const updated = await recordDecision(application.id, reviewState.decision, reviewState.comment)
     if (updated) {
       navigate(`/applications/${updated.id}`)
     }
   }
 
-  function handleStartReview() {
-    const started = startReview(application.id)
+  async function handleStartReview() {
+    const started = await startReview(application.id)
     if (started) {
       navigate(`/applications/${started.id}/review`)
     }
@@ -93,11 +89,19 @@ export default function ReviewerDecisionPage() {
           </div>
 
           <div className="action-strip">
-            <button className="ghost-button" onClick={() => navigate(`/applications/${application.id}`)}>
+            <button
+              className="ghost-button"
+              onClick={() => navigate(`/applications/${application.id}`)}
+            >
               Back to detail
             </button>
             {isReadyToStart ? (
-              <button className="primary-button" onClick={handleStartReview}>
+              <button
+                className="primary-button"
+                onClick={() => {
+                  void handleStartReview()
+                }}
+              >
                 <FiArrowRight />
                 Start Review
               </button>
@@ -246,7 +250,12 @@ export default function ReviewerDecisionPage() {
               >
                 Back to detail
               </button>
-              <button className="primary-button" onClick={handleDecisionSave}>
+              <button
+                className="primary-button"
+                onClick={() => {
+                  void handleDecisionSave()
+                }}
+              >
                 <FiCheckCircle />
                 Record Decision
               </button>
@@ -255,5 +264,52 @@ export default function ReviewerDecisionPage() {
         </>
       )}
     </section>
+  )
+}
+
+export default function ReviewerDecisionPage() {
+  const navigate = useNavigate()
+  const { id } = useParams()
+  const { getApplication, isLoading, startReview, recordDecision } = useApplicationStore()
+
+  const application = id ? getApplication(id) : undefined
+
+  if (isLoading) {
+    return (
+      <section className="detail-card empty-state">
+        <div className="empty-illustration">
+          <FiRefreshCw />
+        </div>
+        <span className="panel-kicker">Loading</span>
+        <h2>Loading reviewer workspace...</h2>
+        <p>Fetching the current record from the API.</p>
+      </section>
+    )
+  }
+
+  if (!application) {
+    return (
+      <section className="detail-card empty-state">
+        <div className="empty-illustration">
+          <FiAlertCircle />
+        </div>
+        <span className="panel-kicker">Not found</span>
+        <h2>The requested application does not exist.</h2>
+        <p>Check the tracking number or return to the queue.</p>
+        <button className="primary-button" onClick={() => navigate('/applications')}>
+          Back to applications
+        </button>
+      </section>
+    )
+  }
+
+  return (
+    <ReviewerDecisionWorkspace
+      key={application.id}
+      application={application}
+      navigate={navigate}
+      startReview={startReview}
+      recordDecision={recordDecision}
+    />
   )
 }

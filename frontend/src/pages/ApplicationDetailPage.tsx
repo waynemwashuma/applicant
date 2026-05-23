@@ -23,12 +23,25 @@ import {
 export default function ApplicationDetailPage() {
   const navigate = useNavigate()
   const { id } = useParams()
-  const { getApplication, submitApplication, startReview } = useApplicationStore()
+  const { getApplication, isLoading, submitApplication, startReview } = useApplicationStore()
 
   const application = id ? getApplication(id) : undefined
   const [feedback, setFeedback] = useState('')
 
   const timeline = application ? buildApplicationTimeline(application) : []
+
+  if (isLoading) {
+    return (
+      <section className="detail-card empty-state">
+        <div className="empty-illustration">
+          <FiRefreshCw />
+        </div>
+        <span className="panel-kicker">Loading</span>
+        <h2>Loading application details...</h2>
+        <p>Fetching the current record from the API.</p>
+      </section>
+    )
+  }
 
   if (!application) {
     return (
@@ -156,8 +169,8 @@ export default function ApplicationDetailPage() {
             </button>
             <button
               className="primary-button"
-              onClick={() => {
-                submitApplication(application.id)
+              onClick={async () => {
+                await submitApplication(application.id)
                 setFeedback('The application has been submitted.')
               }}
             >
@@ -170,8 +183,8 @@ export default function ApplicationDetailPage() {
         {application.status === 'Submitted' && (
           <button
             className="primary-button"
-            onClick={() => {
-              const started = startReview(application.id)
+            onClick={async () => {
+              const started = await startReview(application.id)
               if (started) {
                 navigate(`/applications/${started.id}/review`)
               }

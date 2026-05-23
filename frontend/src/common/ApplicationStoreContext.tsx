@@ -7,182 +7,127 @@ import type {
   ReviewerDecision,
 } from './applicationWorkflow'
 import {
-  STORAGE_KEY,
-  createSeedApplications,
-  createTrackingNumber,
-  nowIso,
-} from './applicationWorkflow'
+  createApplication as createApplicationRequest,
+  fetchApplications as fetchApplicationsRequest,
+  recordDecision as recordDecisionRequest,
+  startReview as startReviewRequest,
+  submitApplication as submitApplicationRequest,
+  updateApplication as updateApplicationRequest,
+} from './applicationApi'
 
 type ApplicationStoreValue = {
   applications: Application[]
+  isLoading: boolean
+  refreshApplications: () => Promise<void>
   getApplication: (id: string) => Application | undefined
-  createApplication: (form: ApplicationFormState) => Application
+  createApplication: (form: ApplicationFormState) => Promise<Application>
   updateApplication: (
     id: string,
     form: ApplicationFormState,
     options?: { resubmit?: boolean },
-  ) => Application | null
-  submitApplication: (id: string) => Application | null
-  startReview: (id: string) => Application | null
+  ) => Promise<Application | null>
+  submitApplication: (id: string) => Promise<Application | null>
+  startReview: (id: string) => Promise<Application | null>
   recordDecision: (
     id: string,
     decision: ReviewerDecision,
     comment: string,
-  ) => Application | null
+  ) => Promise<Application | null>
 }
 
 const ApplicationStoreContext = createContext<ApplicationStoreValue | null>(null)
 
-function readStoredApplications() {
-  if (typeof window === 'undefined') return createSeedApplications()
-
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (!raw) return createSeedApplications()
-
-    const parsed = JSON.parse(raw) as Application[]
-    if (!Array.isArray(parsed) || parsed.length === 0) return createSeedApplications()
-
-    return parsed
-  } catch {
-    return createSeedApplications()
-  }
-}
-
 export function ApplicationStoreProvider({ children }: { children: ReactNode }) {
-  const [applications, setApplications] = useState<Application[]>(readStoredApplications)
+  const [applications, setApplications] = useState<Application[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(applications))
-  }, [applications])
+    let mounted = true
+
+    async function loadApplications() {
+      try {
+        const response = await fetchApplicationsRequest()
+        if (!mounted) return
+        setApplications(response)
+      } finally {
+        if (mounted) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    void loadApplications()
+
+    return () => {
+      mounted = false
+    }
+  }, [])
 
   const value = useMemo<ApplicationStoreValue>(() => {
     function getApplication(id: string) {
       return applications.find((application) => application.id === id)
     }
 
-    function createApplication(form: ApplicationFormState) {
-      const timestamp = nowIso()
-      const application: Application = {
-        id: crypto.randomUUID(),
-        tracking_number: createTrackingNumber(applications.length),
-        ...form,
-        status: 'Draft',
-        reviewer_comment: '',
-        created_at: timestamp,
-        updated_at: timestamp,
-        submitted_at: null,
-        reviewed_at: null,
+    async function refreshApplications() {
+      setIsLoading(true)
+      try {
+        const response = await fetchApplicationsRequest()
+        setApplications(response)
+      } finally {
+        setIsLoading(false)
       }
-
-      setApplications((current) => [application, ...current])
-      return application
     }
 
-    function updateApplication(
+    async function createApplication(form: ApplicationFormState) {
+      const created = await createApplicationRequest(form)
+      setApplications((current) => [created, ...current.filter((application) => application.id !== created.id)])
+      return created
+    }
+
+    async function updateApplication(
       id: string,
       form: ApplicationFormState,
       options?: { resubmit?: boolean },
     ) {
-      const timestamp = nowIso()
-      let updated: Application | null = null
-
+      const updated = await updateApplicationRequest(id, form, options)
       setApplications((current) =>
-        current.map((application) => {
-          if (application.id !== id) return application
-
-          const nextStatus =
-            options?.resubmit || application.status === 'Need More Information'
-              ? 'Submitted'
-              : application.status
-
-          updated = {
-            ...application,
-            ...form,
-            status: nextStatus,
-            submitted_at: nextStatus === 'Submitted' ? timestamp : application.submitted_at,
-            updated_at: timestamp,
-          }
-
-          return updated
-        }),
+        current.map((application) => (application.id === updated.id ? updated : application)),
       )
-
       return updated
     }
 
-    function submitApplication(id: string) {
-      const timestamp = nowIso()
-      let updated: Application | null = null
-
+    async function submitApplication(id: string) {
+      const updated = await submitApplicationRequest(id)
       setApplications((current) =>
-        current.map((application) => {
-          if (application.id !== id) return application
-
-          updated = {
-            ...application,
-            status: 'Submitted',
-            submitted_at: timestamp,
-            updated_at: timestamp,
-          }
-
-          return updated
-        }),
+        current.map((application) => (application.id === updated.id ? updated : application)),
       )
-
       return updated
     }
 
-    function startReview(id: string) {
-      const timestamp = nowIso()
-      let updated: Application | null = null
-
+    async function startReview(id: string) {
+      const updated = await startReviewRequest(id)
       setApplications((current) =>
-        current.map((application) => {
-          if (application.id !== id) return application
-
-          updated = {
-            ...application,
-            status: 'Under Review',
-            updated_at: timestamp,
-          }
-
-          return updated
-        }),
+        current.map((application) => (application.id === updated.id ? updated : application)),
       )
-
       return updated
     }
 
-    function recordDecision(
+    async function recordDecision(
       id: string,
       decision: ReviewerDecision,
       comment: string,
     ) {
-      const timestamp = nowIso()
-      let updated: Application | null = null
-
+      const updated = await recordDecisionRequest(id, decision, comment)
       setApplications((current) =>
-        current.map((application) => {
-          if (application.id !== id) return application
-
-          updated = {
-            ...application,
-            status: decision,
-            reviewer_comment: comment.trim(),
-            reviewed_at: timestamp,
-            updated_at: timestamp,
-          }
-
-          return updated
-        }),
+        current.map((application) => (application.id === updated.id ? updated : application)),
       )
-
       return updated
     }
 
     return {
       applications,
+      isLoading,
+      refreshApplications,
       getApplication,
       createApplication,
       updateApplication,
@@ -190,7 +135,7 @@ export function ApplicationStoreProvider({ children }: { children: ReactNode }) 
       startReview,
       recordDecision,
     }
-  }, [applications])
+  }, [applications, isLoading])
 
   return (
     <ApplicationStoreContext.Provider value={value}>

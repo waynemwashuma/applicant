@@ -1,35 +1,65 @@
 .app-shell {
   position: relative;
   min-height: 100vh;
-  overflow: hidden;
   padding: 32px;
   color: #f5f7fb;
   background: #08111f;
 }
 
-.app-shell::before,
-.app-shell::after {
-  content: '';
+.status-banner-shell {
+  width: min(1280px, 100%);
+  margin: 0 auto 14px;
+  min-height: 58px;
+  position: relative;
+}
+
+.status-banner {
   position: absolute;
-  border-radius: 999px;
-  filter: blur(24px);
+  inset: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0.78rem 1rem;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 198, 87, 0.24);
+  background: rgba(255, 198, 87, 0.1);
+  color: #ffe3b3;
+  line-height: 1.45;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.status-banner.hidden {
+  opacity: 0;
   pointer-events: none;
+  transform: translateY(-4px);
 }
 
-.app-shell::before {
-  top: 0;
-  right: -72px;
-  width: 260px;
-  height: 260px;
-  background: rgba(107, 194, 255, 0.16);
+.status-banner.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-.app-shell::after {
-  left: -90px;
-  bottom: 120px;
-  width: 300px;
-  height: 300px;
-  background: rgba(84, 233, 183, 0.1);
+.status-banner-close {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: background-color 160ms ease;
+}
+
+.status-banner-close:hover,
+.status-banner-close:focus-visible {
+  outline: none;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .site-header {
@@ -65,22 +95,33 @@
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 8px;
 }
 
 .nav-link,
-.nav-hint {
+.nav-hint,
+.nav-toggle {
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  min-height: 46px;
-  padding: 0.82rem 1rem;
+  min-height: 42px;
+  padding: 0.58rem 0.76rem 0.58rem 0.88rem;
   border-radius: 999px;
   border: 1px solid rgba(236, 242, 255, 0.1);
   background: rgba(8, 15, 26, 0.68);
   color: rgba(245, 247, 251, 0.9);
   font-weight: 650;
   white-space: nowrap;
+}
+
+.nav-toggle {
+  width: 152px;
+  border: 1px solid rgba(236, 242, 255, 0.1);
+  cursor: pointer;
+  text-align: left;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
 
 .nav-link {
@@ -91,7 +132,8 @@
 }
 
 .nav-link:hover,
-.nav-link:focus-visible {
+.nav-link:focus-visible,
+.nav-toggle:focus-visible {
   outline: none;
   transform: translateY(-1px);
   background: rgba(123, 184, 255, 0.08);
@@ -106,6 +148,79 @@
 
 .nav-hint {
   color: rgba(231, 238, 248, 0.66);
+}
+
+.nav-toggle {
+  background: rgba(8, 15, 26, 0.68);
+}
+
+.nav-toggle-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-width: 68px;
+  font-size: 0.88rem;
+  line-height: 1.1;
+}
+
+.nav-toggle.live:hover,
+.nav-toggle.live:focus-visible {
+  outline: none;
+  background: rgba(123, 184, 255, 0.08);
+  border-color: rgba(123, 184, 255, 0.28);
+}
+
+.nav-toggle.mock:hover,
+.nav-toggle.mock:focus-visible {
+  outline: none;
+  background: rgba(105, 222, 182, 0.08);
+  border-color: rgba(105, 222, 182, 0.28);
+}
+
+.nav-toggle-track {
+  position: relative;
+  width: 42px;
+  height: 24px;
+  border-radius: 999px;
+  flex: 0 0 auto;
+  background: rgba(231, 238, 248, 0.12);
+  border: 1px solid rgba(236, 242, 255, 0.12);
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
+}
+
+.nav-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #f5f7fb;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.22);
+  transition: transform 180ms ease;
+}
+
+.nav-toggle.mock .nav-toggle-track {
+  background: rgba(105, 222, 182, 0.18);
+  border-color: rgba(105, 222, 182, 0.28);
+}
+
+.nav-toggle.mock .nav-toggle-thumb {
+  transform: translateX(18px);
+}
+
+.nav-toggle.live .nav-toggle-track {
+  background: rgba(123, 184, 255, 0.18);
+  border-color: rgba(123, 184, 255, 0.28);
+}
+
+@media (max-width: 860px) {
+  .nav-toggle {
+    width: 100%;
+    justify-content: space-between;
+  }
 }
 
 .page-frame {
@@ -507,6 +622,13 @@
   margin-bottom: 16px;
   color: rgba(231, 238, 248, 0.72);
   line-height: 1.65;
+}
+
+.loading-state {
+  padding: 22px 24px;
+  color: rgba(231, 238, 248, 0.72);
+  letter-spacing: 0.01em;
+  background: rgba(8, 15, 26, 0.44);
 }
 
 .empty-illustration {

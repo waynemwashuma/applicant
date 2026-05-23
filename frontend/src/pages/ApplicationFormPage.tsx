@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { FiAlertCircle, FiCheckCircle, FiSend } from 'react-icons/fi'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useApplicationStore } from '../common/ApplicationStoreContext'
+import type { Application } from '../common/applicationWorkflow'
 import {
   APPLICATION_TYPES,
   blankForm,
@@ -11,16 +12,28 @@ import {
   type ApplicationFormState,
 } from '../common/applicationWorkflow'
 
-export default function ApplicationFormPage({ mode }: { mode: 'create' | 'edit' }) {
-  const navigate = useNavigate()
-  const { id } = useParams()
-  const { getApplication, createApplication, updateApplication } = useApplicationStore()
+type ApplicationFormEditorProps = {
+  mode: 'create' | 'edit'
+  application?: Application
+  navigate: (path: string) => void
+  createApplication: (form: ApplicationFormState) => Promise<Application>
+  updateApplication: (
+    id: string,
+    form: ApplicationFormState,
+    options?: { resubmit?: boolean },
+  ) => Promise<Application | null>
+}
 
-  const application = mode === 'edit' && id ? getApplication(id) : undefined
-  const [formState, setFormState] = useState<ApplicationFormState>(() => {
-    if (application) return formFromApplication(application)
-    return blankForm()
-  })
+function ApplicationFormEditor({
+  mode,
+  application,
+  navigate,
+  createApplication,
+  updateApplication,
+}: ApplicationFormEditorProps) {
+  const [formState, setFormState] = useState<ApplicationFormState>(() =>
+    application ? formFromApplication(application) : blankForm(),
+  )
   const [error, setError] = useState('')
 
   const resubmitMode = application?.status === 'Need More Information'
@@ -31,7 +44,7 @@ export default function ApplicationFormPage({ mode }: { mode: 'create' | 'edit' 
         ? 'Edit and Resubmit'
         : 'Edit Draft'
 
-  function handleSave() {
+  async function handleSave() {
     const validationError = validateApplicationForm(formState)
     if (validationError) {
       setError(validationError)
@@ -39,7 +52,7 @@ export default function ApplicationFormPage({ mode }: { mode: 'create' | 'edit' 
     }
 
     if (mode === 'create') {
-      const created = createApplication(formState)
+      const created = await createApplication(formState)
       navigate(`/applications/${created.id}`)
       return
     }
@@ -54,29 +67,13 @@ export default function ApplicationFormPage({ mode }: { mode: 'create' | 'edit' 
       return
     }
 
-    const updated = updateApplication(application.id, formState, {
+    const updated = await updateApplication(application.id, formState, {
       resubmit: resubmitMode,
     })
 
     if (updated) {
       navigate(`/applications/${updated.id}`)
     }
-  }
-
-  if (mode === 'edit' && !application) {
-    return (
-      <section className="detail-card empty-state">
-        <div className="empty-illustration">
-          <FiAlertCircle />
-        </div>
-        <span className="panel-kicker">Not found</span>
-        <h2>The requested application does not exist.</h2>
-        <p>Check the tracking number or return to the queue.</p>
-        <button className="primary-button" onClick={() => navigate('/applications')}>
-          Back to applications
-        </button>
-      </section>
-    )
   }
 
   return (
@@ -179,7 +176,12 @@ export default function ApplicationFormPage({ mode }: { mode: 'create' | 'edit' 
             >
               Cancel
             </button>
-            <button className="primary-button" onClick={handleSave}>
+            <button
+              className="primary-button"
+              onClick={() => {
+                void handleSave()
+              }}
+            >
               <FiSend />
               {mode === 'create'
                 ? 'Create Draft'
@@ -198,5 +200,53 @@ export default function ApplicationFormPage({ mode }: { mode: 'create' | 'edit' 
         </div>
       ) : null}
     </section>
+  )
+}
+
+export default function ApplicationFormPage({ mode }: { mode: 'create' | 'edit' }) {
+  const navigate = useNavigate()
+  const { id } = useParams()
+  const { getApplication, isLoading, createApplication, updateApplication } = useApplicationStore()
+
+  const application = mode === 'edit' && id ? getApplication(id) : undefined
+
+  if (isLoading) {
+    return (
+      <section className="detail-card empty-state">
+        <div className="empty-illustration">
+          <FiAlertCircle />
+        </div>
+        <span className="panel-kicker">Loading</span>
+        <h2>Loading application form...</h2>
+        <p>Fetching the current record from the API.</p>
+      </section>
+    )
+  }
+
+  if (mode === 'edit' && !application) {
+    return (
+      <section className="detail-card empty-state">
+        <div className="empty-illustration">
+          <FiAlertCircle />
+        </div>
+        <span className="panel-kicker">Not found</span>
+        <h2>The requested application does not exist.</h2>
+        <p>Check the tracking number or return to the queue.</p>
+        <button className="primary-button" onClick={() => navigate('/applications')}>
+          Back to applications
+        </button>
+      </section>
+    )
+  }
+
+  return (
+    <ApplicationFormEditor
+      key={application?.id ?? 'new'}
+      mode={mode}
+      application={application}
+      navigate={navigate}
+      createApplication={createApplication}
+      updateApplication={updateApplication}
+    />
   )
 }
