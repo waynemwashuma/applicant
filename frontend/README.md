@@ -1,6 +1,8 @@
 # Frontend
 
 This workspace contains the React user interface for the application workflow tracker.
+For now, the UI uses a mocked backend stored in browser `localStorage`, so you can
+exercise the workflow without the Django API running.
 
 ## Overview
 
@@ -10,6 +12,9 @@ This workspace contains the React user interface for the application workflow tr
 - Entry point: `src/main.tsx`
 - App shell: `src/App.tsx`
 - Styling: `src/App.css` and `src/main.css`
+- Shared workflow logic: `src/common/`
+- Data layer: local mock repository with seeded workflow examples
+- Routes: applications list, create/edit form, and application detail screens
 
 ## Run The Frontend
 
@@ -56,4 +61,7 @@ npm run preview
 
 - The frontend workspace is wired for a local development flow with Vite HMR
 - Root `npm install` installs the workspace dependencies for both frontend and backend tooling support at the repository level
-- The UI can be extended to support the application list, detail, form, and reviewer decision screens described in the assignment brief
+- The UI already includes the application list, detail, create/edit form, and reviewer decision screens described in the assignment brief
+- The routed pages live under `src/pages/`
+- The shared workflow rules, validation, and mock store live under `src/common/`
+- The browser cache stores the mock application data; clearing site data will restore the seeded examples
