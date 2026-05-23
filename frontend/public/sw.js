@@ -1,5 +1,6 @@
 const CACHE_NAME = 'workflow-tracker-mock-api-v2'
 const APPLICATIONS_CACHE_KEY = '/__workflow-tracker__/applications'
+const API_ROOT_PATH = new URL('api/', self.location.href).pathname
 let apiMode = 'live'
 
 async function notifyClients(message) {
@@ -281,13 +282,14 @@ function parseJsonBody(request) {
 
 async function handleMockRequest(request) {
   const url = new URL(request.url)
+  const apiPath = url.pathname.slice(API_ROOT_PATH.length)
   const applications = await loadApplications()
 
-  if (request.method === 'GET' && url.pathname === '/api/applications') {
+  if (request.method === 'GET' && apiPath === 'applications') {
     return jsonResponse(applications)
   }
 
-  if (request.method === 'POST' && url.pathname === '/api/applications') {
+  if (request.method === 'POST' && apiPath === 'applications') {
     const payload = await parseJsonBody(request)
     const timestamp = nowIso()
     const application = {
@@ -307,7 +309,7 @@ async function handleMockRequest(request) {
     return jsonResponse(application, 201)
   }
 
-  const applicationPathMatch = url.pathname.match(/^\/api\/applications\/([^/]+)(?:\/(submit|start-review|decision))?$/)
+  const applicationPathMatch = apiPath.match(/^applications\/([^/]+)(?:\/(submit|start-review|decision))?$/)
 
   if (!applicationPathMatch) {
     return errorResponse('Not found', 404)
@@ -425,7 +427,7 @@ self.addEventListener('message', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url)
 
-  if (!url.pathname.startsWith('/api/')) {
+  if (!url.pathname.startsWith(API_ROOT_PATH)) {
     return
   }
 
@@ -440,14 +442,10 @@ self.addEventListener('fetch', (event) => {
 
       try {
         const response = await fetch(networkRequest)
-        if (response.ok || (response.status >= 400 && response.status < 500)) {
-          if (apiMode === 'live') {
-            void notifyClients({ type: 'LIVE_API_AVAILABLE' })
-          }
-          return response
-        }
+        // Static hosts can return HTML 404s for missing API routes; only treat JSON as live API data.
+        const contentType = response.headers.get('content-type') ?? ''
 
-        if (![502, 503, 504].includes(response.status)) {
+        if (contentType.includes('application/json')) {
           if (apiMode === 'live') {
             void notifyClients({ type: 'LIVE_API_AVAILABLE' })
           }

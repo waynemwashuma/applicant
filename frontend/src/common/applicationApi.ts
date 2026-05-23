@@ -1,6 +1,6 @@
 import type { Application, ApplicationFormState, ReviewerDecision } from './applicationWorkflow'
 
-const API_BASE = '/api'
+const API_BASE = `${import.meta.env.BASE_URL}api`
 
 async function parseError(response: Response) {
   try {
