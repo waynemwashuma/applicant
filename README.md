@@ -1,75 +1,67 @@
-# Mini Application Workflow Tracker
+# Application Workflow Tracker
 
-This repository contains a Django backend and a React frontend for an application workflow tracker. The workflow described in the brief is:
+This project has two parts:
 
-`Draft -> Submitted -> Under Review -> Need More Information / Approved / Rejected`
+- A Django backend that stores and serves application data
+- A React frontend that lets you create, review, and update applications
 
-## What’s In The Repo
+## What You Need
 
-- `backend/` - Django project for the API, database, and workflow logic
-- `frontend/` - React + TypeScript + Vite UI
-- `package.json` - root workspace scripts for running both apps together
+- A computer with `Node.js` and `npm` installed
+- Python 3.12 for the backend
+- A web browser such as Chrome, Edge, Firefox, or Safari
+- The backend has its own setup steps available in [backend/README.md](backend/README.md).
 
-## Quick Start
+## Start Here
 
-Install the JavaScript dependencies from the repository root:
+1. Open a terminal.
+2. Go to this project folder.
+3. Set up the backend by following [backend/README.md](backend/README.md).
+4. Install the JavaScript dependencies:
 
 ```bash
 npm install
 ```
 
-Start both workspaces together:
+5. Start both the backend and frontend together:
 
 ```bash
 npm start
 ```
 
-This runs:
+6. Wait for both servers to finish starting.
+7. Open the app in your browser:
 
 - Frontend: `http://localhost:5173`
-- Backend: `http://127.0.0.1:8000`
+- Backend API: `http://127.0.0.1:8000`
 
-## Run Each Workspace Separately
+## If You Want To Run Only One Part
 
-Run only the frontend:
+Start only the frontend:
 
 ```bash
 npm run start:frontend
 ```
 
-Run only the backend:
+Start only the backend:
 
 ```bash
 npm run start:backend
 ```
 
-You can also use the workspace-specific commands documented here:
+## Project Layout
+
+- `backend/` contains the Django project and API
+- `frontend/` contains the React app
+- `package.json` contains the root commands for running both together
+
+## Useful Reads
 
 - [Backend README](backend/README.md)
 - [Frontend README](frontend/README.md)
 
-## Migrations
+## Common Problems
 
-The backend uses SQLite (`backend/db.sqlite3`). If you change models or need to rebuild the schema, run migrations from inside the backend workspace using the same Python environment that powers the app.
-
-The backend README includes the exact commands.
-
-## Assumptions
-
-- The project is being run locally for review, not deployed to production.
-- The backend currently expects the checked-in virtual environment under `backend/venv` or `backend/.venv`.
-- The root workspace commands assume Node.js and npm are available.
-- The assignment brief calls for a Django Ninja API and workflow-specific screens and actions. This repository should be updated to match the brief as features are implemented.
-
-## What Could Be Improved With More Time
-
-- Add a committed dependency file for the backend, such as `requirements.txt` or `pyproject.toml`
-- Add automated backend and frontend tests for the workflow rules
-- Document the API endpoints in more detail
-- Add screenshots or a short walkthrough video
-- Add deployment instructions for a hosted demo environment
-
-## Notes
-
-- The backend launch script is `backend/start.sh`
-- The frontend app uses Vite, React, TypeScript, and plain CSS styling in `frontend/src`
+- If `npm start` fails because the backend cannot find a Python interpreter, check that the backend virtual environment exists and that you completed the steps in `backend/README.md`.
+- If port `5173` or `8000` is already in use, close the other program using that port and try again.
+- If the browser shows old data, clear the site data or do a hard refresh.

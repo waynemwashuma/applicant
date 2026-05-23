@@ -1,22 +1,17 @@
 # Frontend
 
-This workspace contains the React user interface for the application workflow tracker.
-The UI now talks to the Django API through `/api` requests and uses a service
-worker as an offline mock fallback when the backend is unavailable.
+This folder contains the React user interface for the application workflow tracker.
 
-## Overview
+## What It Does
 
-- Framework: React
-- Language: TypeScript
-- Build tool: Vite
-- Entry point: `src/main.tsx`
-- App shell: `src/App.tsx`
-- Styling: `src/App.css` and `src/main.css`
-- Shared workflow logic: `src/common/`
-- Data layer: fetch-driven API client with a service worker mock fallback
-- Routes: applications list, create/edit form, and application detail screens
+- Shows the application list
+- Lets you create and edit applications
+- Shows application details
+- Lets reviewers move applications through the workflow
 
-## Run The Frontend
+The frontend talks to the backend through `/api` requests. If the backend is not available, a service worker can provide an offline mock fallback.
+
+## How To Start It
 
 From the repository root:
 
@@ -24,44 +19,49 @@ From the repository root:
 npm run start:frontend
 ```
 
-Or from inside the frontend folder:
+Or from inside this folder:
 
 ```bash
 cd frontend
 npm run start
 ```
 
-The app runs on:
+The app runs at:
 
 ```text
 http://localhost:5173
 ```
 
-## Build And Check
+## First-Time Setup
 
-From inside `frontend/`, create a production build:
+If you have not already done so, install the workspace dependencies from the repository root:
+
+```bash
+npm install
+```
+
+## Other Useful Commands
+
+Build the app for production:
 
 ```bash
 npm run build
 ```
 
-From inside `frontend/`, run linting:
+Check the code with ESLint:
 
 ```bash
 npm run lint
 ```
 
-From inside `frontend/`, preview the production build locally:
+Preview the production build locally:
 
 ```bash
 npm run preview
 ```
 
-## Notes
+## Troubleshooting
 
-- The frontend workspace is wired for a local development flow with Vite HMR
-- Root `npm install` installs the workspace dependencies for both frontend and backend tooling support at the repository level
-- The UI already includes the application list, detail, create/edit form, and reviewer decision screens described in the assignment brief
-- The routed pages live under `src/pages/`
-- The shared workflow rules, validation, and mock store live under `src/common/`
-- The service worker keeps the offline mock application data in Cache Storage; clearing site data will restore the seeded examples
+- If the page is blank, check that the backend is running at `http://127.0.0.1:8000`
+- If the app still shows old offline data, clear the browser site data or do a hard refresh
+- If the dev server will not start, make sure `npm install` finished successfully

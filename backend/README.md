@@ -1,43 +1,80 @@
 # Backend
 
-This workspace contains the Django project for the application workflow tracker.
+This folder contains the Django backend for the application workflow tracker.
 
-## Overview
+## What It Does
 
-- Framework: Django + Django Ninja
-- Database: SQLite (`db.sqlite3`)
-- App code: `api/`
-- Project config: `config/`
-- Launch script: `start.sh`
+- Stores application data in SQLite
+- Exposes the API used by the frontend
+- Handles the workflow actions such as submit, review, and decision updates
 
-The backend is set up to be run locally with the virtual environment stored in `backend/venv` or `backend/.venv`.
+## Set It Up From Scratch
 
-## Run The Backend
+Use these steps on a fresh machine:
 
-From the repository root:
-
-```bash
-npm run start:backend
-```
-
-Or run the script directly from the backend folder:
+1. Make sure Python 3.12 is installed.
+2. Open a terminal in the repository root.
+3. Create a virtual environment inside `backend/`:
 
 ```bash
-cd backend
-bash start.sh
+python3.12 -m venv backend/venv
 ```
 
-The server starts on:
+4. Activate it:
+
+```bash
+source backend/venv/bin/activate
+```
+
+5. Upgrade pip:
+
+```bash
+python -m pip install --upgrade pip
+```
+
+6. Install the backend dependencies:
+
+```bash
+pip install -r backend/requirements.txt
+```
+
+7. Apply the database migrations:
+
+```bash
+python backend/manage.py migrate
+```
+
+8. Start the backend server:
+
+```bash
+python backend/manage.py runserver --noreload
+```
+
+The backend runs at:
 
 ```text
 http://127.0.0.1:8000
 ```
 
-## Run Migrations
+## Easier Local Start
 
-If you change models or need to recreate the database schema, run migrations using the same Python interpreter from the active virtual environment.
+Once `backend/venv` exists, you can also start the backend from the repository root with:
 
-Example:
+```bash
+npm run start:backend
+```
+
+Or from inside this folder:
+
+```bash
+bash start.sh
+```
+
+## Database
+
+The backend uses SQLite and stores its data in `backend/db.sqlite3`.
+
+If you change models or need to refresh the database schema, run migrations with the Python interpreter from the active backend environment:
 
 ```bash
 cd backend
@@ -45,7 +82,7 @@ source venv/bin/activate
 python manage.py migrate
 ```
 
-If your environment lives at `.venv`, activate that instead:
+If your environment is in `.venv` instead of `venv`, use this command:
 
 ```bash
 source .venv/bin/activate
@@ -54,21 +91,21 @@ python manage.py migrate
 
 ## Useful Commands
 
-Create a Django admin user:
+Create an admin user:
 
 ```bash
 python manage.py createsuperuser
 ```
 
-Run the Django shell:
+Open the Django shell:
 
 ```bash
 python manage.py shell
 ```
 
-## API Endpoints
+## API Routes
 
-The workflow API is mounted under `/api/`:
+The API is mounted under `/api/`.
 
 - `GET /api/applications`
 - `POST /api/applications`
@@ -78,8 +115,9 @@ The workflow API is mounted under `/api/`:
 - `POST /api/applications/{id}/start-review`
 - `POST /api/applications/{id}/decision`
 
-## Notes
+## Troubleshooting
 
-- `start.sh` automatically looks for `backend/venv/bin/python` first, then `backend/.venv/bin/python`
-- There is no committed `requirements.txt` in the repo yet, so the checked-in environment is the fastest way to run the project locally
-- If you add Django Ninja endpoints, wire them through `config/urls.py`
+- If `python3.12` is not available, use whichever Python 3 command points to Python 3.12 or newer, then create the venv with that command instead.
+- If the backend does not start, confirm that `backend/venv/bin/python` exists.
+- If you see a port error, make sure nothing else is using port `8000`.
+- If you reset the database, rerun migrations before starting the app again.
