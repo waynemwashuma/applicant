@@ -29,6 +29,10 @@ At the top of the page, you will see:
 - A role switch that lets you choose `User` or `Reviewer`
 - A `Mock` or `Live` switch for the backend connection
 
+![Application header with role switch, Applications, New Draft, and Mock/Live toggle](assets/application_header.png)
+
+*The top navigation lets you switch roles, open the queue, create a new draft, and change the backend mode.*
+
 If the backend is unavailable, the site may show an offline mock message. You can still explore the app, but the data may be local to your browser.
 
 ## How To Use The Site As A User
@@ -44,6 +48,10 @@ This keeps the site in applicant mode. In this mode, you can create drafts, edit
 Click `Applications` in the top navigation.
 
 You will see a list of applications with columns for tracking number, applicant, company, type, status, and created date.
+
+![Applications queue showing draft, submitted, under review, approved, and rejected records](assets/application_list.png)
+
+*The queue gives you a quick overview of each record and its current status.*
 
 ### 3. Create a new draft
 
@@ -71,6 +79,10 @@ On this page, you can see:
 - The description
 - The created, updated, submitted, and reviewed timestamps
 
+![Application detail page showing the workflow timeline and record summary](assets/application_detail.png)
+
+*The detail page is where you review the record, track its status, and take the next action.*
+
 ### 5. Edit the draft if needed
 
 If the application is still in `Draft`, click `Edit`.
@@ -78,6 +90,10 @@ If the application is still in `Draft`, click `Edit`.
 Update the information, then click `Save Draft`.
 
 If you change your mind, click `Cancel` to return without saving.
+
+![Application edit form for updating a draft or resubmitting a record](assets/edit_application.png)
+
+*Drafts and `Need More Information` records use the same form, so you can update and resubmit from one place.*
 
 ### 6. Submit the application
 
@@ -131,6 +147,10 @@ If the application is still in `Submitted`, click `Start Review`.
 
 This moves the application into `Under Review` and opens the reviewer decision form.
 
+![Reviewer decision workspace with the Under Review state and decision form](assets/application_review.png)
+
+*The reviewer workspace becomes available after review starts, and the decision controls appear on the same page.*
+
 ### 5. Inspect the application
 
 On the reviewer page, check:
@@ -169,11 +189,19 @@ The application will update immediately:
 - `Rejected` completes the workflow
 - `Need More Information` sends the application back so the user can edit and resubmit it
 
+![Reviewer decision form after a final decision has been recorded](assets/application_review_2.png)
+
+*Approved, rejected, and request-more-information decisions are all captured from the same reviewer form.*
+
 ### 8. Return to the queue
 
 After you record the decision, the app takes you back to the application detail page.
 
 From there, you can return to `Applications` and continue with the next record.
+
+![Completed application detail page showing reviewer comments and locked state](assets/application_detail_2.png)
+
+*Once the workflow is complete, the detail page becomes read-only and shows the final reviewer note.*
 
 ## What The Statuses Mean
 
