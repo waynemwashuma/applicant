@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { BrowserRouter, Navigate, NavLink, Outlet, Route, Routes, useParams } from 'react-router-dom'
 import {
   FiAlertCircle,
@@ -43,27 +44,34 @@ function AppLayout({
   onDismissUnavailableBanner,
 }: AppLayoutProps) {
   const roleLabel = userRole === 'reviewer' ? 'Reviewer' : 'User'
+  const statusBanner =
+    showUnavailableBanner && typeof document !== 'undefined'
+      ? createPortal(
+          <div className="status-banner-shell" aria-hidden={!showUnavailableBanner}>
+            <div
+              className={`status-banner ${showUnavailableBanner ? 'visible' : 'hidden'}`}
+              role="status"
+              aria-live="polite"
+            >
+              <FiAlertCircle />
+              <span>The live server is unavailable. Offline mock data is being used.</span>
+              <button
+                type="button"
+                className="status-banner-close"
+                onClick={onDismissUnavailableBanner}
+                aria-label="Dismiss live server unavailable notice"
+              >
+                <FiX />
+              </button>
+            </div>
+          </div>,
+          document.body,
+        )
+      : null
 
   return (
     <div className="app-shell">
-      <div className="status-banner-shell" aria-hidden={!showUnavailableBanner}>
-        <div
-          className={`status-banner ${showUnavailableBanner ? 'visible' : 'hidden'}`}
-          role="status"
-          aria-live="polite"
-        >
-          <FiAlertCircle />
-          <span>The live server is unavailable. Offline mock data is being used.</span>
-          <button
-            type="button"
-            className="status-banner-close"
-            onClick={onDismissUnavailableBanner}
-            aria-label="Dismiss live server unavailable notice"
-          >
-            <FiX />
-          </button>
-        </div>
-      </div>
+      {statusBanner}
       <header className="site-header">
         <div className="site-header-top">
           <div className="brand-block">

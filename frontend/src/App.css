@@ -7,10 +7,10 @@
 }
 
 .status-banner-shell {
-  position: absolute;
+  position: fixed;
   top: 32px;
   left: 50%;
-  z-index: 4;
+  z-index: 9999;
   width: min(1280px, calc(100% - 64px));
   min-height: 58px;
   transform: translateX(-50%);
@@ -25,9 +25,10 @@
   gap: 10px;
   padding: 0.78rem 1rem;
   border-radius: 18px;
-  border: 1px solid rgba(255, 198, 87, 0.24);
-  background: rgba(255, 198, 87, 0.1);
-  color: #ffe3b3;
+  border: 1px solid #ffcf6d;
+  background: #2b2110;
+  color: #ffe7bb;
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.28);
   line-height: 1.45;
   pointer-events: none;
   transition:
@@ -726,6 +727,17 @@
   border: 1px solid rgba(255, 99, 99, 0.22);
   background: rgba(255, 99, 99, 0.08);
   color: #ffb1b1;
+}
+
+.warning-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 198, 87, 0.24);
+  background: rgba(255, 198, 87, 0.1);
+  color: #ffe3b3;
 }
 
 .empty-state {

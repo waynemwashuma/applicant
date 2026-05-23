@@ -19,6 +19,7 @@ import {
 type ApplicationStoreValue = {
   applications: Application[]
   isLoading: boolean
+  loadError: string
   refreshApplications: () => Promise<void>
   getApplication: (id: string) => Application | undefined
   createApplication: (form: ApplicationFormState) => Promise<Application>
@@ -47,6 +48,7 @@ export function ApplicationStoreProvider({
 }) {
   const [applications, setApplications] = useState<Application[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
 
   useEffect(() => {
     let active = true
@@ -56,6 +58,11 @@ export function ApplicationStoreProvider({
         const response = await fetchApplicationsRequest()
         if (!active) return
         setApplications(response)
+        setLoadError('')
+      } catch (error) {
+        if (!active) return
+        setApplications([])
+        setLoadError(error instanceof Error ? error.message : 'Unable to load applications.')
       } finally {
         if (active) {
           setIsLoading(false)
@@ -75,6 +82,9 @@ export function ApplicationStoreProvider({
     try {
       const response = await fetchApplicationsRequest()
       setApplications(response)
+      setLoadError('')
+    } catch (error) {
+      setLoadError(error instanceof Error ? error.message : 'Unable to load applications.')
     } finally {
       setIsLoading(false)
     }
@@ -133,6 +143,7 @@ export function ApplicationStoreProvider({
   const value: ApplicationStoreValue = {
     applications,
     isLoading,
+    loadError,
     refreshApplications,
     getApplication,
     createApplication,

@@ -1,12 +1,12 @@
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FiFolderPlus } from 'react-icons/fi'
+import { FiAlertCircle, FiFolderPlus } from 'react-icons/fi'
 import { useApplicationStore } from '../common/ApplicationStoreContext'
 import { useUserRole } from '../common/UserRoleContext'
 import { formatDate, statusMeta } from '../common/applicationWorkflow'
 export default function ApplicationsPage() {
   const navigate = useNavigate()
-  const { applications, isLoading } = useApplicationStore()
+  const { applications, isLoading, loadError } = useApplicationStore()
   const userRole = useUserRole()
 
   const sortedApplications = useMemo(
@@ -42,6 +42,16 @@ export default function ApplicationsPage() {
           <span>Status</span>
           <span>Created</span>
         </div>
+
+        {loadError ? (
+          <div className="warning-banner" role="status" aria-live="polite">
+            <FiAlertCircle />
+            <span>
+              The server returned an error while loading applications. Showing the
+              available data only.
+            </span>
+          </div>
+        ) : null}
 
         {isLoading ? (
           <div className="loading-state">Loading applications...</div>
