@@ -1,13 +1,25 @@
 import { useEffect, useState } from 'react'
 import { BrowserRouter, Navigate, NavLink, Outlet, Route, Routes, useParams } from 'react-router-dom'
-import { FiAlertCircle, FiFolderPlus, FiGlobe, FiList, FiWifiOff, FiX } from 'react-icons/fi'
+import {
+  FiAlertCircle,
+  FiChevronDown,
+  FiFolderPlus,
+  FiGlobe,
+  FiList,
+  FiUser,
+  FiUserCheck,
+  FiWifiOff,
+  FiX,
+} from 'react-icons/fi'
 import { ApplicationStoreProvider } from './common/ApplicationStoreContext'
+import { UserRoleProvider } from './common/UserRoleContext'
 import {
   notifyServiceWorkerMode,
   persistApiMode,
   readStoredApiMode,
   type ApiMode,
 } from './common/apiMode'
+import { persistUserRole, readStoredUserRole, type UserRole } from './common/roleMode'
 import ApplicationDetailPage from './pages/ApplicationDetailPage'
 import ApplicationFormPage from './pages/ApplicationFormPage'
 import ApplicationsPage from './pages/ApplicationsPage'
@@ -16,17 +28,23 @@ import './App.css'
 
 type AppLayoutProps = {
   apiMode: ApiMode
+  userRole: UserRole
   onToggleApiMode: () => void
+  onChangeUserRole: (role: UserRole) => void
   showUnavailableBanner: boolean
   onDismissUnavailableBanner: () => void
 }
 
 function AppLayout({
   apiMode,
+  userRole,
+  onChangeUserRole,
   onToggleApiMode,
   showUnavailableBanner,
   onDismissUnavailableBanner,
 }: AppLayoutProps) {
+  const roleLabel = userRole === 'reviewer' ? 'Reviewer' : 'User'
+
   return (
     <div className="app-shell">
       <div className="status-banner-shell" aria-hidden={!showUnavailableBanner}>
@@ -48,13 +66,50 @@ function AppLayout({
         </div>
       </div>
       <header className="site-header">
-        <div className="brand-block">
-          <span className="eyebrow">Application Workflow Tracker</span>
-          <p>
-            Navigate between the application list, the create/edit form, and the
-            application detail page while you can switch between the live API and
-            the offline mock server.
-          </p>
+        <div className="site-header-top">
+          <div className="brand-block">
+            <span className="eyebrow">Application Workflow Tracker</span>
+          </div>
+
+          <div className="role-menu">
+            <details className="role-menu-details">
+              <summary className="role-menu-trigger" aria-label="Switch user role">
+                <span className="role-menu-icon">
+                  {userRole === 'reviewer' ? <FiUserCheck /> : <FiUser />}
+                </span>
+                <span className="role-menu-label">{roleLabel}</span>
+                <FiChevronDown className="role-menu-chevron" aria-hidden="true" />
+              </summary>
+              <div className="role-menu-panel" role="menu" aria-label="Workspace role">
+                <button
+                  type="button"
+                  className={`role-menu-option ${userRole === 'user' ? 'active' : ''}`}
+                  onClick={(event) => {
+                    onChangeUserRole('user')
+                    ;(event.currentTarget.closest('details') as HTMLDetailsElement | null)?.removeAttribute('open')
+                  }}
+                  role="menuitemradio"
+                  aria-checked={userRole === 'user'}
+                >
+                  <FiUser />
+                  User
+                </button>
+                <button
+                  type="button"
+                  className={`role-menu-option ${userRole === 'reviewer' ? 'active' : ''}`}
+                  onClick={(event) => {
+                    onChangeUserRole('reviewer')
+                    ;(event.currentTarget.closest('details') as HTMLDetailsElement | null)?.removeAttribute('open')
+                  }}
+                  role="menuitemradio"
+                  aria-checked={userRole === 'reviewer'}
+                >
+                  <FiUserCheck />
+                  Reviewer
+                </button>
+              </div>
+            </details>
+          </div>
         </div>
 
         <nav className="site-nav" aria-label="Primary">
@@ -120,6 +175,7 @@ function ReviewerDecisionRoute() {
 
 export default function App() {
   const [apiMode, setApiMode] = useState<ApiMode>(() => readStoredApiMode())
+  const [userRole, setUserRole] = useState<UserRole>(() => readStoredUserRole())
   const [showUnavailableBanner, setShowUnavailableBanner] = useState(false)
   const [dismissedUnavailableBanner, setDismissedUnavailableBanner] = useState(false)
 
@@ -127,6 +183,10 @@ export default function App() {
     persistApiMode(apiMode)
     void notifyServiceWorkerMode(apiMode)
   }, [apiMode])
+
+  useEffect(() => {
+    persistUserRole(userRole)
+  }, [userRole])
 
   useEffect(() => {
     if (!('serviceWorker' in navigator)) return
@@ -154,41 +214,47 @@ export default function App() {
 
   return (
     <BrowserRouter>
-      <ApplicationStoreProvider>
-        <Routes>
-          <Route
-            element={
-              <AppLayout
-                apiMode={apiMode}
-                showUnavailableBanner={showUnavailableBanner && !dismissedUnavailableBanner}
-                onDismissUnavailableBanner={() => {
-                  setDismissedUnavailableBanner(true)
-                }}
-                onToggleApiMode={() =>
-                  setApiMode((current) => {
-                    const nextMode = current === 'live' ? 'mock' : 'live'
-                    if (nextMode === 'mock') {
-                      setShowUnavailableBanner(false)
-                      setDismissedUnavailableBanner(false)
-                    }
-                    return nextMode
-                  })
-                }
-              />
-            }
-          >
-            <Route index element={<Navigate to="/applications" replace />} />
-            <Route path="/applications" element={<ApplicationsPage />} />
-            <Route path="/applications/new" element={<CreateRoute />} />
-            <Route path="/applications/:id" element={<DetailRoute />} />
-            <Route path="/applications/:id/edit" element={<EditApplicationRoute />} />
-            <Route path="/applications/:id/review" element={<ReviewerDecisionRoute />} />
+      <ApplicationStoreProvider apiMode={apiMode}>
+        <UserRoleProvider value={{ userRole, setUserRole }}>
+          <Routes>
             <Route
-              path="*"
-              element={<Navigate to="/applications" replace />}
-            />
-          </Route>
-        </Routes>
+              element={
+                <AppLayout
+                  apiMode={apiMode}
+                  userRole={userRole}
+                  showUnavailableBanner={showUnavailableBanner && !dismissedUnavailableBanner}
+                  onDismissUnavailableBanner={() => {
+                    setDismissedUnavailableBanner(true)
+                  }}
+                  onChangeUserRole={(role) => {
+                    setUserRole(role)
+                  }}
+                  onToggleApiMode={() =>
+                    setApiMode((current) => {
+                      const nextMode = current === 'live' ? 'mock' : 'live'
+                      if (nextMode === 'mock') {
+                        setShowUnavailableBanner(false)
+                        setDismissedUnavailableBanner(false)
+                      }
+                      return nextMode
+                    })
+                  }
+                />
+              }
+            >
+              <Route index element={<Navigate to="/applications" replace />} />
+              <Route path="/applications" element={<ApplicationsPage userRole={userRole} />} />
+              <Route path="/applications/new" element={<CreateRoute />} />
+              <Route path="/applications/:id" element={<DetailRoute />} />
+              <Route path="/applications/:id/edit" element={<EditApplicationRoute />} />
+              <Route path="/applications/:id/review" element={<ReviewerDecisionRoute />} />
+              <Route
+                path="*"
+                element={<Navigate to="/applications" replace />}
+              />
+            </Route>
+          </Routes>
+        </UserRoleProvider>
       </ApplicationStoreProvider>
     </BrowserRouter>
   )

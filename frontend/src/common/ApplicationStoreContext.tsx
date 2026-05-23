@@ -1,11 +1,12 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import type {
   Application,
   ApplicationFormState,
   ReviewerDecision,
 } from './applicationWorkflow'
+import type { ApiMode } from './apiMode'
 import {
   createApplication as createApplicationRequest,
   fetchApplications as fetchApplicationsRequest,
@@ -37,20 +38,26 @@ type ApplicationStoreValue = {
 
 const ApplicationStoreContext = createContext<ApplicationStoreValue | null>(null)
 
-export function ApplicationStoreProvider({ children }: { children: ReactNode }) {
+export function ApplicationStoreProvider({
+  children,
+  apiMode,
+}: {
+  children: ReactNode
+  apiMode: ApiMode
+}) {
   const [applications, setApplications] = useState<Application[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    let mounted = true
+    let active = true
 
     async function loadApplications() {
       try {
         const response = await fetchApplicationsRequest()
-        if (!mounted) return
+        if (!active) return
         setApplications(response)
       } finally {
-        if (mounted) {
+        if (active) {
           setIsLoading(false)
         }
       }
@@ -59,83 +66,81 @@ export function ApplicationStoreProvider({ children }: { children: ReactNode }) 
     void loadApplications()
 
     return () => {
-      mounted = false
+      active = false
     }
-  }, [])
+  }, [apiMode])
 
-  const value = useMemo<ApplicationStoreValue>(() => {
-    function getApplication(id: string) {
-      return applications.find((application) => application.id === id)
+  async function refreshApplications() {
+    setIsLoading(true)
+    try {
+      const response = await fetchApplicationsRequest()
+      setApplications(response)
+    } finally {
+      setIsLoading(false)
     }
+  }
 
-    async function refreshApplications() {
-      setIsLoading(true)
-      try {
-        const response = await fetchApplicationsRequest()
-        setApplications(response)
-      } finally {
-        setIsLoading(false)
-      }
-    }
+  function getApplication(id: string) {
+    return applications.find((application) => application.id === id)
+  }
 
-    async function createApplication(form: ApplicationFormState) {
-      const created = await createApplicationRequest(form)
-      setApplications((current) => [created, ...current.filter((application) => application.id !== created.id)])
-      return created
-    }
+  async function createApplication(form: ApplicationFormState) {
+    const created = await createApplicationRequest(form)
+    setApplications((current) => [created, ...current.filter((application) => application.id !== created.id)])
+    return created
+  }
 
-    async function updateApplication(
-      id: string,
-      form: ApplicationFormState,
-      options?: { resubmit?: boolean },
-    ) {
-      const updated = await updateApplicationRequest(id, form, options)
-      setApplications((current) =>
-        current.map((application) => (application.id === updated.id ? updated : application)),
-      )
-      return updated
-    }
+  async function updateApplication(
+    id: string,
+    form: ApplicationFormState,
+    options?: { resubmit?: boolean },
+  ) {
+    const updated = await updateApplicationRequest(id, form, options)
+    setApplications((current) =>
+      current.map((application) => (application.id === updated.id ? updated : application)),
+    )
+    return updated
+  }
 
-    async function submitApplication(id: string) {
-      const updated = await submitApplicationRequest(id)
-      setApplications((current) =>
-        current.map((application) => (application.id === updated.id ? updated : application)),
-      )
-      return updated
-    }
+  async function submitApplication(id: string) {
+    const updated = await submitApplicationRequest(id)
+    setApplications((current) =>
+      current.map((application) => (application.id === updated.id ? updated : application)),
+    )
+    return updated
+  }
 
-    async function startReview(id: string) {
-      const updated = await startReviewRequest(id)
-      setApplications((current) =>
-        current.map((application) => (application.id === updated.id ? updated : application)),
-      )
-      return updated
-    }
+  async function startReview(id: string) {
+    const updated = await startReviewRequest(id)
+    setApplications((current) =>
+      current.map((application) => (application.id === updated.id ? updated : application)),
+    )
+    return updated
+  }
 
-    async function recordDecision(
-      id: string,
-      decision: ReviewerDecision,
-      comment: string,
-    ) {
-      const updated = await recordDecisionRequest(id, decision, comment)
-      setApplications((current) =>
-        current.map((application) => (application.id === updated.id ? updated : application)),
-      )
-      return updated
-    }
+  async function recordDecision(
+    id: string,
+    decision: ReviewerDecision,
+    comment: string,
+  ) {
+    const updated = await recordDecisionRequest(id, decision, comment)
+    setApplications((current) =>
+      current.map((application) => (application.id === updated.id ? updated : application)),
+    )
+    return updated
+  }
 
-    return {
-      applications,
-      isLoading,
-      refreshApplications,
-      getApplication,
-      createApplication,
-      updateApplication,
-      submitApplication,
-      startReview,
-      recordDecision,
-    }
-  }, [applications, isLoading])
+  const value: ApplicationStoreValue = {
+    applications,
+    isLoading,
+    refreshApplications,
+    getApplication,
+    createApplication,
+    updateApplication,
+    submitApplication,
+    startReview,
+    recordDecision,
+  }
 
   return (
     <ApplicationStoreContext.Provider value={value}>

@@ -7,10 +7,14 @@
 }
 
 .status-banner-shell {
-  width: min(1280px, 100%);
-  margin: 0 auto 14px;
+  position: absolute;
+  top: 32px;
+  left: 50%;
+  z-index: 4;
+  width: min(1280px, calc(100% - 64px));
   min-height: 58px;
-  position: relative;
+  transform: translateX(-50%);
+  pointer-events: none;
 }
 
 .status-banner {
@@ -25,6 +29,7 @@
   background: rgba(255, 198, 87, 0.1);
   color: #ffe3b3;
   line-height: 1.45;
+  pointer-events: none;
   transition:
     opacity 160ms ease,
     transform 160ms ease;
@@ -53,6 +58,7 @@
   background: transparent;
   color: inherit;
   cursor: pointer;
+  pointer-events: auto;
   transition: background-color 160ms ease;
 }
 
@@ -64,13 +70,23 @@
 
 .site-header {
   position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 20px;
+  z-index: 6;
+  display: grid;
+  gap: 18px;
   width: min(1280px, 100%);
   margin: 0 auto 20px;
+  overflow: visible;
+}
+
+.site-header-top {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  width: 100%;
+  z-index: 7;
+  overflow: visible;
 }
 
 .brand-block {
@@ -92,10 +108,119 @@
 }
 
 .site-nav {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
+}
+
+.role-menu {
+  position: relative;
+  z-index: 20;
+}
+
+.role-menu-details {
+  position: relative;
+}
+
+.role-menu-details > summary {
+  list-style: none;
+}
+
+.role-menu-details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.role-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 42px;
+  padding: 0.58rem 0.8rem 0.58rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(236, 242, 255, 0.1);
+  background: rgba(8, 15, 26, 0.68);
+  color: rgba(245, 247, 251, 0.92);
+  font-weight: 650;
+  cursor: pointer;
+  user-select: none;
+}
+
+.role-menu-trigger:hover,
+.role-menu-trigger:focus-visible {
+  outline: none;
+  background: rgba(123, 184, 255, 0.08);
+  border-color: rgba(123, 184, 255, 0.28);
+}
+
+.role-menu-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(123, 184, 255, 0.12);
+  color: #8ad0ff;
+}
+
+.role-menu-label {
+  font-size: 0.88rem;
+}
+
+.role-menu-chevron {
+  opacity: 0.78;
+  font-size: 0.88rem;
+}
+
+.role-menu-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 1000;
+  display: grid;
+  gap: 6px;
+  min-width: 200px;
+  padding: 8px;
+  border-radius: 18px;
+  border: 1px solid rgba(236, 242, 255, 0.1);
+  background: rgba(8, 15, 26, 0.96);
+  box-shadow: 0 22px 44px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(20px);
+}
+
+.role-menu-option {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.82rem 0.9rem;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  color: rgba(245, 247, 251, 0.9);
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.role-menu-option:hover,
+.role-menu-option:focus-visible {
+  outline: none;
+  transform: translateY(-1px);
+  background: rgba(123, 184, 255, 0.08);
+  border-color: rgba(123, 184, 255, 0.22);
+}
+
+.role-menu-option.active {
+  background: rgba(123, 184, 255, 0.12);
+  border-color: rgba(123, 184, 255, 0.3);
+  color: #d9e9ff;
 }
 
 .nav-link,
@@ -758,8 +883,11 @@
   }
 
   .site-header {
+    gap: 16px;
+  }
+
+  .site-header-top {
     align-items: flex-start;
-    flex-direction: column;
   }
 
   .site-nav {
@@ -770,6 +898,17 @@
 @media (max-width: 860px) {
   .app-shell {
     padding: 18px;
+  }
+
+  .site-header-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .role-menu-panel {
+    right: auto;
+    left: 0;
+    min-width: 180px;
   }
 
   .detail-grid,
