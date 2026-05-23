@@ -3,7 +3,6 @@ import { BrowserRouter, Navigate, NavLink, Outlet, Route, Routes, useParams } fr
 import {
   FiAlertCircle,
   FiChevronDown,
-  FiFolderPlus,
   FiGlobe,
   FiList,
   FiUser,
@@ -117,13 +116,6 @@ function AppLayout({
             <FiList />
             Applications
           </NavLink>
-          <NavLink
-            to="/applications/new"
-            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-          >
-            <FiFolderPlus />
-            New Draft
-          </NavLink>
           <button
             type="button"
             className={`nav-toggle ${apiMode === 'mock' ? 'mock' : 'live'}`}
@@ -178,6 +170,7 @@ export default function App() {
   const [userRole, setUserRole] = useState<UserRole>(() => readStoredUserRole())
   const [showUnavailableBanner, setShowUnavailableBanner] = useState(false)
   const [dismissedUnavailableBanner, setDismissedUnavailableBanner] = useState(false)
+  const canManageApplications = userRole !== 'reviewer'
 
   useEffect(() => {
     persistApiMode(apiMode)
@@ -244,9 +237,21 @@ export default function App() {
             >
               <Route index element={<Navigate to="/applications" replace />} />
               <Route path="/applications" element={<ApplicationsPage />} />
-              <Route path="/applications/new" element={<CreateRoute />} />
+              <Route
+                path="/applications/new"
+                element={canManageApplications ? <CreateRoute /> : <Navigate to="/applications" replace />}
+              />
               <Route path="/applications/:id" element={<DetailRoute />} />
-              <Route path="/applications/:id/edit" element={<EditApplicationRoute />} />
+              <Route
+                path="/applications/:id/edit"
+                element={
+                  canManageApplications ? (
+                    <EditApplicationRoute />
+                  ) : (
+                    <Navigate to="/applications" replace />
+                  )
+                }
+              />
               <Route path="/applications/:id/review" element={<ReviewerDecisionRoute />} />
               <Route
                 path="*"

@@ -29,6 +29,7 @@ export default function ApplicationDetailPage() {
 
   const application = id ? getApplication(id) : undefined
   const [feedback, setFeedback] = useState('')
+  const canManageApplications = userRole !== 'reviewer'
 
   const timeline = application ? buildApplicationTimeline(application) : []
 
@@ -160,7 +161,7 @@ export default function ApplicationDetailPage() {
       </article>
 
       <div className="action-strip">
-        {application.status === 'Draft' && (
+        {application.status === 'Draft' && canManageApplications && (
           <>
             <button
               className="secondary-button"
@@ -180,6 +181,13 @@ export default function ApplicationDetailPage() {
               Submit
             </button>
           </>
+        )}
+
+        {application.status === 'Draft' && !canManageApplications && (
+          <div className="locked-note">
+            <FiAlertCircle />
+            <span>Reviewer mode cannot create or edit applications.</span>
+          </div>
         )}
 
         {application.status === 'Submitted' && (
@@ -221,7 +229,7 @@ export default function ApplicationDetailPage() {
           )
         )}
 
-        {application.status === 'Need More Information' && (
+        {application.status === 'Need More Information' && canManageApplications && (
           <>
             <button
               className="secondary-button"
@@ -240,6 +248,13 @@ export default function ApplicationDetailPage() {
               Resubmit
             </button>
           </>
+        )}
+
+        {application.status === 'Need More Information' && !canManageApplications && (
+          <div className="locked-note">
+            <FiAlertCircle />
+            <span>Reviewer mode cannot edit or resubmit applications.</span>
+          </div>
         )}
 
         {(application.status === 'Approved' || application.status === 'Rejected') && (

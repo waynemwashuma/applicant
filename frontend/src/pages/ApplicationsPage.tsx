@@ -2,10 +2,12 @@ import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { FiFolderPlus } from 'react-icons/fi'
 import { useApplicationStore } from '../common/ApplicationStoreContext'
+import { useUserRole } from '../common/UserRoleContext'
 import { formatDate, statusMeta } from '../common/applicationWorkflow'
 export default function ApplicationsPage() {
   const navigate = useNavigate()
   const { applications, isLoading } = useApplicationStore()
+  const userRole = useUserRole()
 
   const sortedApplications = useMemo(
     () =>
@@ -24,10 +26,12 @@ export default function ApplicationsPage() {
             <span className="panel-kicker">Queue</span>
             <h2>Applications</h2>
           </div>
-          <button className="ghost-button" onClick={() => navigate('/applications/new')}>
-            <FiFolderPlus />
-            Create Draft
-          </button>
+          {userRole !== 'reviewer' ? (
+            <button className="ghost-button" onClick={() => navigate('/applications/new')}>
+              <FiFolderPlus />
+              Create Draft
+            </button>
+          ) : null}
         </div>
 
         <div className="table-head">

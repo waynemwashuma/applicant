@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { FiAlertCircle, FiCheckCircle, FiSend } from 'react-icons/fi'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useApplicationStore } from '../common/ApplicationStoreContext'
+import { useUserRole } from '../common/UserRoleContext'
 import type { Application } from '../common/applicationWorkflow'
 import {
   APPLICATION_TYPES,
@@ -207,8 +208,25 @@ export default function ApplicationFormPage({ mode }: { mode: 'create' | 'edit' 
   const navigate = useNavigate()
   const { id } = useParams()
   const { getApplication, isLoading, createApplication, updateApplication } = useApplicationStore()
+  const userRole = useUserRole()
 
   const application = mode === 'edit' && id ? getApplication(id) : undefined
+
+  if (userRole === 'reviewer') {
+    return (
+      <section className="detail-card empty-state">
+        <div className="empty-illustration">
+          <FiAlertCircle />
+        </div>
+        <span className="panel-kicker">Reviewer mode</span>
+        <h2>Reviewers cannot create or edit applications.</h2>
+        <p>Switch to user mode if you need to start or update a draft.</p>
+        <button className="primary-button" onClick={() => navigate('/applications')}>
+          Back to applications
+        </button>
+      </section>
+    )
+  }
 
   if (isLoading) {
     return (
