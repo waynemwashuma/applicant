@@ -166,7 +166,7 @@ function ReviewerDecisionRoute() {
 }
 
 export default function App() {
-  const [apiMode, setApiMode] = useState<ApiMode>(() => readStoredApiMode())
+  const [apiMode] = useState<ApiMode>(() => readStoredApiMode())
   const [userRole, setUserRole] = useState<UserRole>(() => readStoredUserRole())
   const [showUnavailableBanner, setShowUnavailableBanner] = useState(false)
   const [dismissedUnavailableBanner, setDismissedUnavailableBanner] = useState(false)
@@ -222,16 +222,11 @@ export default function App() {
                   onChangeUserRole={(role) => {
                     setUserRole(role)
                   }}
-                  onToggleApiMode={() =>
-                    setApiMode((current) => {
-                      const nextMode = current === 'live' ? 'mock' : 'live'
-                      if (nextMode === 'mock') {
-                        setShowUnavailableBanner(false)
-                        setDismissedUnavailableBanner(false)
-                      }
-                      return nextMode
-                    })
-                  }
+                  onToggleApiMode={() => {
+                    const nextMode = apiMode === 'live' ? 'mock' : 'live'
+                    persistApiMode(nextMode)
+                    window.location.reload()
+                  }}
                 />
               }
             >
