@@ -213,7 +213,7 @@ export default function App() {
   }, [])
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <ApplicationStoreProvider apiMode={apiMode}>
         <UserRoleProvider value={{ userRole, setUserRole }}>
           <Routes>

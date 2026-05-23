@@ -4,6 +4,7 @@ import babel from '@rolldown/plugin-babel'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: process.env.GITHUB_PAGES === 'true' ? '/applicant/' : '/',
   plugins: [
     react(),
     babel({ presets: [reactCompilerPreset()] })
