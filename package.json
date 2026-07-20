@@ -17,7 +17,7 @@
   "bugs": {
     "url": "https://github.com/waynemwashuma/applicant/issues"
   },
-  "homepage": "https://waynemwashuma.github.io/applicant/",
+  "homepage": "https://applicant.mwashuma.dev/",
   "workspaces": [
     "frontend"
   ],
